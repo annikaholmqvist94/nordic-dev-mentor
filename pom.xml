@@ -44,6 +44,12 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Production-ready endpoints, including /actuator/health for Railway -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- @ConfigurationProperties scanning utan extra annoteringar -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
