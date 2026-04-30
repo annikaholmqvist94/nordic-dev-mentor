@@ -35,3 +35,9 @@ logs/
 HELP.md
 
 .superpowers/
+
+### Claude Code ###
+.claude/
+
+### Local design docs ###
+docs/
