@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: nordic-dev-mentor
+
+server:
+  port: 8080
+
+# Allt under "devmentor" är vår egen config bind till @ConfigurationProperties-records.
+devmentor:
+
+  conversation:
+    # Sliding window-storlek. 10 = ~5 turer fram och tillbaka behålls.
+    max-messages: 10
+
+  openrouter:
+    # Sätts via miljövariabel
+    api-key: ${OPENROUTER_API_KEY:}
+    base-url: https://openrouter.ai/api/v1
+
+    model: ${OPENROUTER_MODEL:poolside/laguna-xs.2:free}
+    connect-timeout: 5s
+    response-timeout: 60s
+    retry:
+      max-attempts: 3
+      initial-backoff: 500ms
+      max-backoff: 4s
+
+# springdoc / Swagger UI på /swagger-ui.html
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    se.devmentor: DEBUG
+    org.springframework.web.reactive.function.client: INFO
