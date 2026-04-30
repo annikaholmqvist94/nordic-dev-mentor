@@ -37,3 +37,15 @@ logging:
   level:
     se.devmentor: DEBUG
     org.springframework.web.reactive.function.client: INFO
+
+# Endast health-endpointen ska vara exponerad.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
