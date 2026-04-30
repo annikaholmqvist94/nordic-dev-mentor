@@ -33,3 +33,5 @@ target/
 *.log
 logs/
 HELP.md
+
+.superpowers/
