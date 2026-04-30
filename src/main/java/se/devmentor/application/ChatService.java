@@ -44,9 +44,9 @@ public class ChatService {
         Message userMessage = Message.user(request.message());
         messagesForLlm.add(userMessage);
 
-        // Anropa LLM:en. Om det failar kastas LlmServiceException som GlobalExceptionHandler
-        // mappar till 503.
-        String reply = llmClient.complete(messagesForLlm);
+        // Anropa LLM:en med personlighetens egen temperature. Om det failar kastas
+        // LlmServiceException som GlobalExceptionHandler mappar till 503.
+        String reply = llmClient.complete(messagesForLlm, request.personality().temperature());
 
         // Spara först nu vi vill inte ha kvar user-meddelandet i historiken om
         // anropet failar permanent.
