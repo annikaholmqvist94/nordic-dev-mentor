@@ -3,7 +3,7 @@ spring:
     name: nordic-dev-mentor
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 # Allt under "devmentor" är vår egen config bind till @ConfigurationProperties-records.
 devmentor:
