@@ -1,4 +1,4 @@
-package se.veldrift.devmentor.config;
+package se.devmentor.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

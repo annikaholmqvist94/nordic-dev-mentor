@@ -1,4 +1,4 @@
-package se.veldrift.devmentor.web;
+package se.devmentor.web;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import se.veldrift.devmentor.application.ChatService;
-import se.veldrift.devmentor.web.dto.ChatRequest;
-import se.veldrift.devmentor.web.dto.ChatResponse;
+import se.devmentor.application.ChatService;
+import se.devmentor.web.dto.ChatRequest;
+import se.devmentor.web.dto.ChatResponse;
 
 @RestController
 @RequestMapping(value = "/api/v1/chat", produces = MediaType.APPLICATION_JSON_VALUE)

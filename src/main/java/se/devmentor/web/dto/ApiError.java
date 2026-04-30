@@ -1,4 +1,4 @@
-package se.veldrift.devmentor.web.dto;
+package se.devmentor.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -1,4 +1,4 @@
-package se.veldrift.devmentor.exception;
+package se.devmentor.exception;
 
 /**
  * Kastas när anropet till LLM-leverantören misslyckas på ett sätt som

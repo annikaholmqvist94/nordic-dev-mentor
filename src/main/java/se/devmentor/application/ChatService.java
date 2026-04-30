@@ -1,13 +1,13 @@
-package se.veldrift.devmentor.application;
+package se.devmentor.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import se.veldrift.devmentor.domain.ConversationStore;
-import se.veldrift.devmentor.domain.LlmClient;
-import se.veldrift.devmentor.domain.Message;
-import se.veldrift.devmentor.web.dto.ChatRequest;
-import se.veldrift.devmentor.web.dto.ChatResponse;
+import se.devmentor.domain.ConversationStore;
+import se.devmentor.domain.LlmClient;
+import se.devmentor.domain.Message;
+import se.devmentor.web.dto.ChatRequest;
+import se.devmentor.web.dto.ChatResponse;
 
 import java.util.ArrayList;
 import java.util.List;

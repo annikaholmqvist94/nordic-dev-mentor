@@ -1,6 +1,6 @@
-package se.veldrift.devmentor.infrastructure.llm;
+package se.devmentor.infrastructure.llm;
 
-import se.veldrift.devmentor.domain.Message;
+import se.devmentor.domain.Message;
 
 import java.util.List;
 

@@ -1,10 +1,10 @@
-package se.veldrift.devmentor.infrastructure.store;
+package se.devmentor.infrastructure.store;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import se.veldrift.devmentor.config.ConversationProperties;
-import se.veldrift.devmentor.domain.ConversationStore;
-import se.veldrift.devmentor.domain.Message;
+import se.devmentor.config.ConversationProperties;
+import se.devmentor.domain.ConversationStore;
+import se.devmentor.domain.Message;
 
 import java.util.ArrayList;
 import java.util.Collections;

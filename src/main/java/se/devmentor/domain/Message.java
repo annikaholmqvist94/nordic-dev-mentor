@@ -1,4 +1,4 @@
-package se.veldrift.devmentor.domain;
+package se.devmentor.domain;
 
 /**
  * Ett meddelande i en konversation.

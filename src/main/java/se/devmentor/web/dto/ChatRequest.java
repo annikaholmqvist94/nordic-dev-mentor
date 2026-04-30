@@ -1,9 +1,9 @@
-package se.veldrift.devmentor.web.dto;
+package se.devmentor.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import se.veldrift.devmentor.domain.Personality;
+import se.devmentor.domain.Personality;
 
 /**
  * Inkommande chatt-request från klient.

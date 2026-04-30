@@ -1,4 +1,4 @@
-package se.veldrift.devmentor;
+package se.devmentor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

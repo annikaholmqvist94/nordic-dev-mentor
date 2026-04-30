@@ -1,4 +1,4 @@
-package se.veldrift.devmentor.domain;
+package se.devmentor.domain;
 
 import java.util.List;
 

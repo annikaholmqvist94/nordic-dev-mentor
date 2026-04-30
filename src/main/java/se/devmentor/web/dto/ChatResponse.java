@@ -1,7 +1,7 @@
-package se.veldrift.devmentor.web.dto;
+package se.devmentor.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import se.veldrift.devmentor.domain.Personality;
+import se.devmentor.domain.Personality;
 
 @Schema(description = "Svar från LLM via Nordic Dev Mentor")
 public record ChatResponse(

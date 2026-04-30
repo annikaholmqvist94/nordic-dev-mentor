@@ -1,14 +1,14 @@
-package se.veldrift.devmentor.infrastructure.llm;
+package se.devmentor.infrastructure.llm;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import se.veldrift.devmentor.config.OpenRouterProperties;
-import se.veldrift.devmentor.domain.LlmClient;
-import se.veldrift.devmentor.domain.Message;
-import se.veldrift.devmentor.exception.LlmServiceException;
+import se.devmentor.config.OpenRouterProperties;
+import se.devmentor.domain.LlmClient;
+import se.devmentor.domain.Message;
+import se.devmentor.exception.LlmServiceException;
 
 import java.util.List;
 

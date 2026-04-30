@@ -1,4 +1,4 @@
-package se.veldrift.devmentor.infrastructure.llm;
+package se.devmentor.infrastructure.llm;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
