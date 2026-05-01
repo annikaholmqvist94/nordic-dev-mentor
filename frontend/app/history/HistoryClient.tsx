@@ -63,7 +63,7 @@ export function HistoryClient() {
           >
             <Link
               href={`/?id=${conv.id}`}
-              className="flex-1 min-w-0 group"
+              className="flex-1 min-w-0 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cream rounded-sm"
             >
               <div className="font-serif text-[16px] text-text-primary group-hover:text-accent transition-colors leading-snug truncate">
                 {conv.title}
@@ -76,13 +76,13 @@ export function HistoryClient() {
               <div className="flex gap-2 shrink-0 text-[10px] uppercase tracking-[0.12em]">
                 <button
                   onClick={() => confirmDelete(conv.id)}
-                  className="text-error-accent hover:underline cursor-pointer"
+                  className="text-error-accent hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cream rounded-sm"
                 >
                   Confirm
                 </button>
                 <button
                   onClick={() => setPendingDeleteId(null)}
-                  className="text-text-muted hover:underline cursor-pointer"
+                  className="text-text-muted hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-muted focus-visible:ring-offset-2 focus-visible:ring-offset-cream rounded-sm"
                 >
                   Cancel
                 </button>
@@ -90,7 +90,7 @@ export function HistoryClient() {
             ) : (
               <button
                 onClick={() => setPendingDeleteId(conv.id)}
-                className="shrink-0 text-text-disabled hover:text-error-accent text-[16px] leading-none cursor-pointer transition-colors"
+                className="shrink-0 text-text-disabled hover:text-error-accent text-[16px] leading-none cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cream rounded-sm"
                 aria-label="Delete conversation"
               >
                 ×
