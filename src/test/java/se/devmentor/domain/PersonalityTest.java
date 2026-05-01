@@ -22,7 +22,7 @@ class PersonalityTest {
     }
 
     @Test
-    void rubber_duck_uses_most_varied_temperature() {
-        assertThat(Personality.RUBBER_DUCK.temperature()).isEqualTo(0.9);
+    void rubber_duck_uses_balanced_temperature_for_persona_plus_joke_variation() {
+        assertThat(Personality.RUBBER_DUCK.temperature()).isEqualTo(0.7);
     }
 }
