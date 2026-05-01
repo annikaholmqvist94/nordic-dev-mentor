@@ -17,7 +17,7 @@ devmentor:
     api-key: ${OPENROUTER_API_KEY:}
     base-url: https://openrouter.ai/api/v1
 
-    model: ${OPENROUTER_MODEL:poolside/laguna-xs.2:free}
+    model: ${OPENROUTER_MODEL:anthropic/claude-3.5-haiku}
     connect-timeout: 5s
     response-timeout: 60s
     retry:
