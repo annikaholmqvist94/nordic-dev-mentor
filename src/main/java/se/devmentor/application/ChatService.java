@@ -61,4 +61,9 @@ public class ChatService {
                 .filter(s -> !s.isBlank())
                 .orElseGet(() -> UUID.randomUUID().toString());
     }
+
+    public void deleteSession(String sessionId) {
+        log.debug("Deleting session={}", sessionId);
+        conversationStore.clear(sessionId);
+    }
 }
