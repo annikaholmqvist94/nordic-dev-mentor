@@ -3,7 +3,7 @@ spring:
     name: nordic-dev-mentor
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 # Allt under "devmentor" är vår egen config bind till @ConfigurationProperties-records.
 devmentor:
@@ -37,3 +37,15 @@ logging:
   level:
     se.devmentor: DEBUG
     org.springframework.web.reactive.function.client: INFO
+
+# Endast health-endpointen ska vara exponerad.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+

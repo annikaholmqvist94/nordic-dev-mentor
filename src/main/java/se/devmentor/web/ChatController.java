@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +40,19 @@ public class ChatController {
     })
     public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
         return chatService.handleChat(request);
+    }
+
+    @DeleteMapping("/{sessionId}")
+    @Operation(
+            summary = "Radera en konversation",
+            description = "Rensar in-memory historiken för angiven session-id. " +
+                    "Returnerar 204 även om sessionen inte fanns (idempotent)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Sessionen är borta")
+    })
+    public ResponseEntity<Void> deleteSession(@PathVariable String sessionId) {
+        chatService.deleteSession(sessionId);
+        return ResponseEntity.noContent().build();
     }
 }

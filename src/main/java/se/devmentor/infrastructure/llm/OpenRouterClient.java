@@ -30,12 +30,12 @@ public class OpenRouterClient implements LlmClient {
     private final OpenRouterProperties properties;
 
     @Override
-    public String complete(List<Message> messages) {
-        OpenRouterRequest request = OpenRouterRequest.of(properties.model(), messages);
-        log.debug("Calling OpenRouter model={} messageCount={}",
-                properties.model(), messages.size());
+    public String complete(List<Message> messages, double temperature) {
+        OpenRouterRequest request = OpenRouterRequest.of(properties.model(), temperature, messages);
+        log.debug("Calling OpenRouter model={} temperature={} messageCount={}",
+                properties.model(), temperature, messages.size());
 
-        // TODO Pass 6: wrap this call with Retry.backoff(...) retry only on
+        // TODO : wrap this call with Retry.backoff(...) retry only on
         //              5xx, 429 and network timeouts (NEVER on 4xx). Add an
         //              Idempotency-Key header generated ONCE per logical call
         //              so retries are deduped server-side and we don't get

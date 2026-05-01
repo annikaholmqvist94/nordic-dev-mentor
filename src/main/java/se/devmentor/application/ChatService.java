@@ -44,9 +44,9 @@ public class ChatService {
         Message userMessage = Message.user(request.message());
         messagesForLlm.add(userMessage);
 
-        // Anropa LLM:en. Om det failar kastas LlmServiceException som GlobalExceptionHandler
-        // mappar till 503.
-        String reply = llmClient.complete(messagesForLlm);
+        // Anropa LLM:en med personlighetens egen temperature. Om det failar kastas
+        // LlmServiceException som GlobalExceptionHandler mappar till 503.
+        String reply = llmClient.complete(messagesForLlm, request.personality().temperature());
 
         // Spara först nu vi vill inte ha kvar user-meddelandet i historiken om
         // anropet failar permanent.
@@ -60,5 +60,10 @@ public class ChatService {
         return Optional.ofNullable(incoming)
                 .filter(s -> !s.isBlank())
                 .orElseGet(() -> UUID.randomUUID().toString());
+    }
+
+    public void deleteSession(String sessionId) {
+        log.debug("Deleting session={}", sessionId);
+        conversationStore.clear(sessionId);
     }
 }

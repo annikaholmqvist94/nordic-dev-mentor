@@ -11,7 +11,7 @@ import java.util.List;
  * leak out of infrastructure/llm/. The domain works in {@link Message}; this
  * record is the adapter on the way out.
  */
-record OpenRouterRequest(String model, List<RequestMessage> messages) {
+record OpenRouterRequest(String model, double temperature, List<RequestMessage> messages) {
 
     /** OpenRouter expects role as lowercase: "system", "user", "assistant". */
     record RequestMessage(String role, String content) {
@@ -23,9 +23,10 @@ record OpenRouterRequest(String model, List<RequestMessage> messages) {
         }
     }
 
-    static OpenRouterRequest of(String model, List<Message> messages) {
+    static OpenRouterRequest of(String model, double temperature, List<Message> messages) {
         return new OpenRouterRequest(
                 model,
+                temperature,
                 messages.stream().map(RequestMessage::from).toList());
     }
 }

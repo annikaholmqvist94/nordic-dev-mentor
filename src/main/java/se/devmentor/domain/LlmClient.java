@@ -13,9 +13,10 @@ public interface LlmClient {
     /**
      * Skicka en lista av meddelanden till LLM:en och få tillbaka assistentens svar.
      *
-     * @param messages hela kontexten system prompt först, sedan user/assistant
-     *                 i kronologisk ordning
+     * @param messages    hela kontexten — system prompt först, sedan user/assistant
+     *                    i kronologisk ordning
+     * @param temperature sampling temperature (0.0 = deterministic, ~1.0 = creative)
      * @return assistentens text-svar
      */
-    String complete(List<Message> messages);
+    String complete(List<Message> messages, double temperature);
 }
