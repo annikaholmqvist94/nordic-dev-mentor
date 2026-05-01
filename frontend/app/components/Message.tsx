@@ -1,3 +1,5 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { findPersonality } from "../personality";
 import type { PersonalityWire } from "../types";
 
@@ -20,9 +22,17 @@ export function Message(props: Props) {
       <div className="text-[9px] uppercase tracking-[0.16em] text-text-muted font-medium mb-1.5">
         {roleLabel}
       </div>
-      <div className="text-[14px] leading-[1.65] text-text-emphasis whitespace-pre-wrap">
-        {props.content}
-      </div>
+      {isUser ? (
+        <div className="text-[14px] leading-[1.65] text-text-emphasis whitespace-pre-wrap">
+          {props.content}
+        </div>
+      ) : (
+        <div className="prose-editorial text-[14px] leading-[1.65] text-text-emphasis">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {props.content}
+          </ReactMarkdown>
+        </div>
+      )}
     </div>
   );
 }

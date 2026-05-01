@@ -26,7 +26,7 @@ export function InputArea({ inputPrompt, disabled, onSubmit }: Props) {
   }
 
   return (
-    <div className="border-t border-border-subtle bg-cream-surface px-8 py-4 flex items-center gap-3 shrink-0">
+    <div className="border-t border-border-subtle bg-cream-surface px-4 sm:px-8 py-3 sm:py-4 flex items-center gap-2 sm:gap-3 shrink-0">
       <span className="font-mono text-[11px] text-text-disabled lowercase shrink-0">
         <span className="text-accent">›</span> {inputPrompt}
       </span>
@@ -36,10 +36,10 @@ export function InputArea({ inputPrompt, disabled, onSubmit }: Props) {
         onKeyDown={handleKey}
         disabled={disabled}
         rows={1}
-        className="flex-1 font-mono text-[13px] text-text-primary bg-transparent border-none outline-none resize-none disabled:opacity-50"
-        placeholder=""
+        aria-label={`Message ${inputPrompt}`}
+        className="flex-1 font-mono text-[13px] text-text-primary bg-transparent border-none outline-none resize-none disabled:opacity-50 focus-visible:ring-1 focus-visible:ring-accent focus-visible:rounded-sm"
       />
-      <span className="text-[9px] uppercase tracking-[0.14em] text-text-disabled shrink-0">
+      <span className="hidden sm:inline text-[9px] uppercase tracking-[0.14em] text-text-disabled shrink-0">
         <kbd className="bg-white border border-border-emphasis border-b-2 px-1.5 py-0.5 font-mono text-[10px] rounded text-text-emphasis">
           ↵
         </kbd>{" "}

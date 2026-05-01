@@ -23,6 +23,17 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Nordic Dev Mentor",
   description: "Four AI mentors. One conversation at a time.",
+  openGraph: {
+    title: "Nordic Dev Mentor",
+    description: "Four AI mentors. One conversation at a time.",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+    title: "Nordic Dev Mentor",
+    description: "Four AI mentors. One conversation at a time.",
+  },
 };
 
 export default function RootLayout({
