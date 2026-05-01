@@ -1,5 +1,7 @@
 "use server";
 
+import type { PersonalityWire, SendMessageResult } from "./types";
+
 type HealthResponse = {
   status: string;
 };
@@ -21,5 +23,38 @@ export async function probeBackend(): Promise<ProbeResult> {
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown error";
     return { ok: false, error: message };
+  }
+}
+
+type ChatBackendResponse = {
+  sessionId: string;
+  personality: string;
+  reply: string;
+};
+
+export async function sendMessage(
+  personality: PersonalityWire,
+  message: string,
+  sessionId?: string,
+): Promise<SendMessageResult> {
+  const url = `${process.env.BACKEND_URL}/api/v1/chat`;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ personality, message, sessionId }),
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      return { ok: false, error: `HTTP ${res.status} from backend` };
+    }
+
+    const data: ChatBackendResponse = await res.json();
+    return { ok: true, sessionId: data.sessionId, reply: data.reply };
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "unknown error";
+    return { ok: false, error };
   }
 }
