@@ -1,8 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { sendMessage } from "./actions";
 import { DEFAULT_PERSONALITY, findPersonality } from "./personality";
+import {
+  findConversation,
+  upsertConversation,
+} from "./lib/storage";
 import type { ConversationEntry, PersonalityWire } from "./types";
 import { TopBar } from "./components/TopBar";
 import { PersonalityTabs } from "./components/PersonalityTabs";
@@ -21,13 +25,28 @@ type ErrorState = {
 let entryIdCounter = 0;
 const newId = () => `e-${++entryIdCounter}`;
 
-export function ChatClient() {
+type Props = {
+  initialSessionId?: string;
+};
+
+export function ChatClient({ initialSessionId }: Props) {
   const [personality, setPersonality] =
     useState<PersonalityWire>(DEFAULT_PERSONALITY);
   const [entries, setEntries] = useState<ConversationEntry[]>([]);
-  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  const [sessionId, setSessionId] = useState<string | undefined>(
+    initialSessionId,
+  );
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<ErrorState | null>(null);
+
+  // Hydrate personality from localStorage when continuing an existing session.
+  useEffect(() => {
+    if (!initialSessionId) return;
+    const stored = findConversation(initialSessionId);
+    if (stored) {
+      setPersonality(stored.personality);
+    }
+  }, [initialSessionId]);
 
   function selectPersonality(next: PersonalityWire) {
     if (next === personality) return;
@@ -41,6 +60,27 @@ export function ChatClient() {
     setError(null);
   }
 
+  function newChat() {
+    setEntries([]);
+    setSessionId(undefined);
+    setError(null);
+    setPersonality(DEFAULT_PERSONALITY);
+    if (typeof window !== "undefined" && window.location.search) {
+      window.history.replaceState({}, "", "/");
+    }
+  }
+
+  function persistConversation(id: string, userMsg: string) {
+    const existing = findConversation(id);
+    upsertConversation({
+      id,
+      personality,
+      title: existing?.title ?? userMsg.slice(0, 60),
+      lastMessage: userMsg,
+      updatedAt: Date.now(),
+    });
+  }
+
   function submit(message: string) {
     setError(null);
     setEntries((prev) => [...prev, { id: newId(), kind: "user", content: message }]);
@@ -49,6 +89,7 @@ export function ChatClient() {
       const result = await sendMessage(personality, message, sessionId);
       if (result.ok) {
         setSessionId(result.sessionId);
+        persistConversation(result.sessionId, message);
         setEntries((prev) => [
           ...prev,
           {
@@ -74,7 +115,11 @@ export function ChatClient() {
   return (
     <div className="flex flex-col min-h-screen">
       <TopBar />
-      <PersonalityTabs active={personality} onSelect={selectPersonality} />
+      <PersonalityTabs
+        active={personality}
+        onSelect={selectPersonality}
+        onNewChat={newChat}
+      />
       <ReadingColumn>
         {entries.length === 0 && !pending && !error ? (
           <EmptyState personality={personality} />

@@ -12,6 +12,7 @@ import { ChatClient } from "../ChatClient";
 describe("ChatClient", () => {
   beforeEach(() => {
     vi.mocked(sendMessage).mockReset();
+    localStorage.clear();
   });
 
   it("renders the empty state for the default personality on first load", () => {
@@ -110,5 +111,57 @@ describe("ChatClient", () => {
 
     expect(screen.getByText(/switched to/i)).toBeInTheDocument();
     expect(screen.getByText(/the reviewer/i)).toBeInTheDocument();
+  });
+
+  it("persists conversation metadata to localStorage on first reply", async () => {
+    vi.mocked(sendMessage).mockResolvedValueOnce({
+      ok: true,
+      sessionId: "session-xyz",
+      reply: "Postgres.",
+    });
+
+    const user = userEvent.setup();
+    render(<ChatClient />);
+
+    await user.type(screen.getByRole("textbox"), "DB?");
+    await user.keyboard("{Enter}");
+    await waitFor(() =>
+      expect(screen.getByText("Postgres.")).toBeInTheDocument(),
+    );
+
+    const raw = localStorage.getItem("ndm.conversations");
+    expect(raw).not.toBeNull();
+    const parsed = JSON.parse(raw!);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0]).toMatchObject({
+      id: "session-xyz",
+      personality: "senior-architect",
+      title: "DB?",
+      lastMessage: "DB?",
+    });
+    expect(typeof parsed[0].updatedAt).toBe("number");
+  });
+
+  it("clears state when newChat button is clicked after a conversation", async () => {
+    vi.mocked(sendMessage).mockResolvedValueOnce({
+      ok: true,
+      sessionId: "session-1",
+      reply: "first reply",
+    });
+
+    const user = userEvent.setup();
+    render(<ChatClient />);
+
+    await user.type(screen.getByRole("textbox"), "first message");
+    await user.keyboard("{Enter}");
+    await waitFor(() =>
+      expect(screen.getByText("first reply")).toBeInTheDocument(),
+    );
+
+    await user.click(screen.getByRole("button", { name: /new chat/i }));
+
+    expect(screen.queryByText("first message")).not.toBeInTheDocument();
+    expect(screen.queryByText("first reply")).not.toBeInTheDocument();
+    expect(screen.getByText("The architect is listening.")).toBeInTheDocument();
   });
 });

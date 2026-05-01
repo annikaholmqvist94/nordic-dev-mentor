@@ -12,3 +12,11 @@ export type ConversationEntry =
 export type SendMessageResult =
   | { ok: true; sessionId: string; reply: string }
   | { ok: false; error: string };
+
+export type StoredConversation = {
+  id: string;
+  personality: PersonalityWire;
+  title: string;
+  lastMessage: string;
+  updatedAt: number;
+};

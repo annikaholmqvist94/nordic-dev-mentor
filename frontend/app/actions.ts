@@ -58,3 +58,12 @@ export async function sendMessage(
     return { ok: false, error };
   }
 }
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  const url = `${process.env.BACKEND_URL}/api/v1/chat/${sessionId}`;
+  try {
+    await fetch(url, { method: "DELETE", cache: "no-store" });
+  } catch {
+    // best effort — localStorage cleanup proceeds regardless
+  }
+}
