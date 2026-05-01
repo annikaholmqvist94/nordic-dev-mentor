@@ -26,7 +26,7 @@ export function InputArea({ inputPrompt, disabled, onSubmit }: Props) {
   }
 
   return (
-    <div className="border-t border-border-subtle bg-cream-surface px-8 py-4 flex items-center gap-3 shrink-0">
+    <div className="border-t border-border-subtle bg-cream-surface px-4 sm:px-8 py-3 sm:py-4 flex items-center gap-2 sm:gap-3 shrink-0">
       <span className="font-mono text-[11px] text-text-disabled lowercase shrink-0">
         <span className="text-accent">›</span> {inputPrompt}
       </span>
