@@ -1,0 +1,7 @@
+# Aktiveras med SPRING_PROFILES_ACTIVE=prod (sätts i Railway).
+# Skiljer sig från default genom tystare loggning — DEBUG-nivåer från
+# default application.yml gäller bara lokal utveckling.
+logging:
+  level:
+    se.devmentor: INFO
+    org.springframework.web.reactive.function.client: WARN
