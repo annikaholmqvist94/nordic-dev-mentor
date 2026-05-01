@@ -17,7 +17,7 @@ const crimson = Crimson_Pro({
 const mono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
-  variable: "--font-mono",
+  variable: "--font-jetbrains-mono",
 });
 
 export const metadata: Metadata = {
@@ -30,7 +30,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${inter.variable} ${crimson.variable} ${mono.variable}`}>
-      <body className="bg-cream text-stone-900 font-sans antialiased min-h-screen">
+      <body className="bg-cream text-text-primary font-sans antialiased min-h-screen">
         {children}
       </body>
     </html>

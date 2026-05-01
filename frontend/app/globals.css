@@ -16,7 +16,7 @@
 
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-serif: var(--font-crimson), Georgia, serif;
-  --font-mono: var(--font-mono), "JetBrains Mono", monospace;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
 }
 
 body {
