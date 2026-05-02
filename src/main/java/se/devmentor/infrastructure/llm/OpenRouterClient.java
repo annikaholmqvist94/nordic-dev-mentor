@@ -5,19 +5,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.util.retry.Retry;
 import se.devmentor.config.OpenRouterProperties;
 import se.devmentor.domain.LlmClient;
 import se.devmentor.domain.Message;
 import se.devmentor.exception.LlmServiceException;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * OpenRouter implementation of {@link LlmClient}.
  *
- * Sends the conversation to OpenRouter's /chat/completions endpoint and returns
- * the assistant's reply. Resilience (retry/backoff, idempotency) is added in
- *  TODO inside {@link #complete}.
+ * Sends the conversation to OpenRouter's /chat/completions endpoint with
+ * exponential-backoff retry on 429, 5xx, and network errors. Each logical
+ * call gets a single Idempotency-Key header that is reused across retries
+ * so OpenRouter dedupes server-side and we never get double-billed.
  */
 @Component
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ import java.util.List;
 public class OpenRouterClient implements LlmClient {
 
     private static final String CHAT_COMPLETIONS_PATH = "/chat/completions";
+    private static final String IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
 
     private final WebClient openRouterWebClient;
     private final OpenRouterProperties properties;
@@ -32,21 +36,20 @@ public class OpenRouterClient implements LlmClient {
     @Override
     public String complete(List<Message> messages, double temperature) {
         OpenRouterRequest request = OpenRouterRequest.of(properties.model(), temperature, messages);
-        log.debug("Calling OpenRouter model={} temperature={} messageCount={}",
-                properties.model(), temperature, messages.size());
+        String idempotencyKey = UUID.randomUUID().toString();
 
-        // TODO : wrap this call with Retry.backoff(...) retry only on
-        //              5xx, 429 and network timeouts (NEVER on 4xx). Add an
-        //              Idempotency-Key header generated ONCE per logical call
-        //              so retries are deduped server-side and we don't get
-        //              double-billed for the same prompt.
+        log.debug("Calling OpenRouter model={} temperature={} messageCount={} idempotencyKey={}",
+                properties.model(), temperature, messages.size(), idempotencyKey);
+
         OpenRouterResponse response;
         try {
             response = openRouterWebClient.post()
                     .uri(CHAT_COMPLETIONS_PATH)
+                    .header(IDEMPOTENCY_KEY_HEADER, idempotencyKey)
                     .bodyValue(request)
                     .retrieve()
                     .bodyToMono(OpenRouterResponse.class)
+                    .retryWhen(buildRetrySpec())
                     .block();
         } catch (WebClientResponseException ex) {
             log.error("OpenRouter returned {} {}: {}",
@@ -68,6 +71,30 @@ public class OpenRouterClient implements LlmClient {
             throw new LlmServiceException("OpenRouter returned an empty response");
         }
         return content;
+    }
+
+    /**
+     * Exponential-backoff retry spec — retries on 429, 5xx, and network errors.
+     * 4xx (other than 429) fails fast since retries won't help client errors.
+     * On exhaustion, the original failure is re-thrown so the existing catch
+     * blocks above produce the same LlmServiceException as before.
+     */
+    private Retry buildRetrySpec() {
+        OpenRouterProperties.Retry config = properties.retry();
+        long retries = Math.max(0, config.maxAttempts() - 1);
+        return Retry.backoff(retries, config.initialBackoff())
+                .maxBackoff(config.maxBackoff())
+                .filter(OpenRouterClient::isRetryable)
+                .onRetryExhaustedThrow((spec, signal) -> signal.failure());
+    }
+
+    private static boolean isRetryable(Throwable throwable) {
+        if (throwable instanceof WebClientResponseException ex) {
+            int status = ex.getStatusCode().value();
+            return status == 429 || status >= 500;
+        }
+        // Network errors, timeouts, connect failures — retry.
+        return true;
     }
 
     private static String extractContent(OpenRouterResponse response) {
