@@ -5,11 +5,17 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
 import se.devmentor.config.OpenRouterProperties;
 import se.devmentor.domain.Message;
 import se.devmentor.exception.LlmServiceException;
 
+import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.List;
 
@@ -142,9 +148,18 @@ class OpenRouterClientWireMockTest {
     }
 
     private OpenRouterClient clientWithRetries(int maxAttempts) {
-        WebClient webClient = WebClient.builder()
-                .baseUrl(wireMock.baseUrl())
+        HttpClient jdkHttpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofSeconds(5))
                 .build();
+        JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(jdkHttpClient);
+        factory.setReadTimeout(Duration.ofSeconds(5));
+
+        RestClient restClient = RestClient.builder()
+                .baseUrl(wireMock.baseUrl())
+                .requestFactory(factory)
+                .build();
+
         OpenRouterProperties props = new OpenRouterProperties(
                 "test-key",
                 wireMock.baseUrl(),
@@ -153,6 +168,15 @@ class OpenRouterClientWireMockTest {
                 Duration.ofSeconds(5),
                 new OpenRouterProperties.Retry(maxAttempts, Duration.ofMillis(1), Duration.ofMillis(2))
         );
-        return new OpenRouterClient(webClient, props);
+
+        RetryTemplate retryTemplate = RetryTemplate.builder()
+                .maxAttempts(maxAttempts)
+                .exponentialBackoff(1L, 2.0, 2L)
+                .retryOn(HttpServerErrorException.class)
+                .retryOn(HttpClientErrorException.TooManyRequests.class)
+                .retryOn(ResourceAccessException.class)
+                .build();
+
+        return new OpenRouterClient(restClient, props, retryTemplate);
     }
 }
