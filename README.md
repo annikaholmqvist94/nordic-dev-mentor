@@ -26,8 +26,8 @@ without losing context.
 
 **Backend**
 - Spring Boot 4 on Java 21
-- Spring WebClient against OpenRouter
-- Reactor `Retry.backoff` (429 / 5xx with exponential delay + Idempotency-Key for dedup)
+- Spring RestClient (sync) over JDK 11 HttpClient against OpenRouter
+- Spring Retry `RetryTemplate` (429 / 5xx with exponential backoff + Idempotency-Key for dedup)
 - springdoc-openapi at `/swagger-ui.html`
 - In-memory conversation store with sliding-window history (10 messages)
 - Spring Boot Actuator for `/actuator/health`
