@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.6</version>
         <relativePath/>
     </parent>
 
@@ -21,6 +21,7 @@
         <java.version>21</java.version>
         <springdoc.version>3.0.3</springdoc.version>
         <wiremock.version>3.13.2</wiremock.version>
+        <spring-retry.version>2.0.12</spring-retry.version>
     </properties>
 
     <dependencies>
@@ -30,12 +31,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- WebClient kommer från webflux-startern. Vi kör fortfarande blocking i servicen,
-             men WebClient är den moderna HTTP-klienten i Spring och det enda valet för
-             retry/backoff via Reactor. -->
+        <!-- Spring Retry — programmatisk RetryTemplate för exponentiell backoff
+             på OpenRouter-anrop. RestClient (sync HTTP) ingår redan i spring-boot-starter-web. -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+            <version>${spring-retry.version}</version>
         </dependency>
 
         <!-- Bean Validation: @NotBlank, @Size etc på DTO:er -->
@@ -90,13 +91,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Reaktiva tester (StepVerifier) — användbart för att testa retry-logik -->
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
 
