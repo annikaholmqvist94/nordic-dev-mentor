@@ -2,6 +2,13 @@ spring:
   application:
     name: nordic-dev-mentor
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 5s
+
 server:
   port: ${PORT:8080}
 
@@ -11,6 +18,10 @@ devmentor:
   conversation:
     # Sliding window-storlek. 10 = ~5 turer fram och tillbaka behålls.
     max-messages: 10
+
+  store:
+    # in-memory (default) eller redis. Override via DEVMENTOR_STORE_TYPE.
+    type: ${DEVMENTOR_STORE_TYPE:in-memory}
 
   openrouter:
     # Sätts via miljövariabel
@@ -48,4 +59,10 @@ management:
     health:
       probes:
         enabled: true
+  # Redis-deps är på classpath så Spring försöker autoconfigure en RedisHealthIndicator.
+  # Vi stänger av den default så tester (och in-memory-läge) inte kräver Redis igång.
+  # Aktivera i Redis-läge via MANAGEMENT_HEALTH_REDIS_ENABLED=true.
+  health:
+    redis:
+      enabled: ${MANAGEMENT_HEALTH_REDIS_ENABLED:false}
 
