@@ -31,7 +31,10 @@ public class ChatController {
             summary = "Skicka ett meddelande till en AI-personlighet",
             description = "Skickar användarens meddelande till vald personlighet. " +
                     "Om sessionId saknas startas en ny konversation. " +
-                    "Om sessionId anges fortsätter vi den existerande historiken."
+                    "Om sessionId anges fortsätter vi den existerande historiken. " +
+                    "PII (email, telefonnummer, svenskt personnummer) maskeras " +
+                    "automatiskt i meddelandet innan det skickas till LLM. Vilka " +
+                    "typer som maskerades returneras i fältet `maskedFields`."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Svar från AI:n"),
