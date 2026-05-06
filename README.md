@@ -29,7 +29,7 @@ without losing context.
 - Spring RestClient (sync) over JDK 11 HttpClient against OpenRouter
 - Spring Retry `RetryTemplate` (429 / 5xx with exponential backoff + Idempotency-Key for dedup)
 - springdoc-openapi at `/swagger-ui.html`
-- In-memory conversation store with sliding-window history (10 messages)
+- Pluggable conversation store with sliding-window history (in-memory by default, Redis opt-in)
 - Spring Boot Actuator for `/actuator/health`
 
 **Frontend**
@@ -111,6 +111,53 @@ mvn test                   # backend (14 tests)
 cd frontend && npm test    # frontend (26 tests)
 ```
 
+## Conversation store options
+
+The backend has two `ConversationStore` implementations behind the same port,
+selected at startup via the `DEVMENTOR_STORE_TYPE` env var.
+
+### In-memory (default)
+
+No setup. Conversations live in a `ConcurrentHashMap` in app memory. Lost on
+restart, doesn't scale across instances. Fine for local dev and demos.
+
+### Redis (opt-in)
+
+Persists conversations in Redis. Survives restarts and works across instances.
+
+1. Set env vars in `.env`:
+
+   ```bash
+   DEVMENTOR_STORE_TYPE=redis
+   MANAGEMENT_HEALTH_REDIS_ENABLED=true
+   ```
+
+2. Run the backend:
+
+   ```bash
+   JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn spring-boot:run
+   ```
+
+   The `spring-boot-docker-compose` integration auto-starts `compose.yaml`
+   (Redis 7-alpine on `localhost:6379`) and connects the app once the
+   container is healthy. Stopping the app stops the container too.
+
+3. Inspect data while the app runs:
+
+   ```bash
+   docker exec -it nordic-dev-mentor-redis redis-cli
+   > KEYS ndm:session:*
+   > LRANGE ndm:session:<id> 0 -1
+   ```
+
+The Redis adapter stores one Redis List per session under the key
+`ndm:session:<sessionId>` and enforces the sliding window via `RPUSH` +
+`LTRIM`. Window size comes from `devmentor.conversation.max-messages`.
+
+For production (Railway etc.), point `REDIS_HOST`, `REDIS_PORT`, and
+`REDIS_PASSWORD` at your hosted Redis. Docker Compose is a local-dev
+convenience only.
+
 ## API
 
 `POST /api/v1/chat`
@@ -131,9 +178,10 @@ Full schema at `/swagger-ui.html`.
 
 ## Known limitations
 
-- **In-memory backend store** — conversations vanish on backend restart. The
-  frontend's localStorage keeps session IDs visible in History, but the
-  server side has nothing to rehydrate from.
+- **In-memory backend store (default)** — conversations vanish on backend
+  restart. The frontend's localStorage keeps session IDs visible in History,
+  but the server side has nothing to rehydrate from. Opt in to Redis mode
+  (see "Conversation store options") to keep state across restarts.
 - **No authentication** — a session ID is an opaque UUID. Anyone who guesses
   one can read that conversation. A real product would bind sessions to JWT.
 - **Single instance only** — sliding-window history is per-process, so
