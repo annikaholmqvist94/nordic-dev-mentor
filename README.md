@@ -46,7 +46,7 @@ without losing context.
   the backend, no CORS configuration needed
 
 **Tests**
-- 14 backend tests (JUnit 5 + WireMock + MockMvc)
+- 20 backend tests (JUnit 5 + WireMock + MockMvc + Mockito)
 - 26 frontend tests (Vitest + React Testing Library)
 
 ## Architecture
@@ -102,61 +102,65 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000.                                                                                                                                     
+                                                                                                                                                                  
+  ### Tests                                                                                                                                                       
+                                                                                                                                                                  
+  ```bash                                     
+  mvn test                   # backend (20 tests)
+  mvn verify                 # backend + coverage report
+  cd frontend && npm test    # frontend (26 tests)                                                                                                                
+  ```
+                                                                                                                                                                  
+  Coverage report at `target/site/jacoco/index.html`.
+                                          
+  ## Conversation store options
+                                                                                                                                                                  
+  The backend has two `ConversationStore` implementations behind the same port,
+  selected at startup via the `DEVMENTOR_STORE_TYPE` env var.                                                                                                     
+                                              
+  ### In-memory (default)                 
 
-### Tests
+  No setup. Conversations live in a `ConcurrentHashMap` in app memory. Lost on                                                                                    
+  restart, doesn't scale across instances. Fine for local dev and demos.
+                                                                                                                                                                  
+  ### Redis (opt-in)                      
 
-```bash
-mvn test                   # backend (14 tests)
-cd frontend && npm test    # frontend (26 tests)
-```
+  Persists conversations in Redis. Survives restarts and works across instances.                                                                                  
+   
+  1. Set env vars in `.env`:                                                                                                                                      
+                                          
+     ```bash
+     DEVMENTOR_STORE_TYPE=redis                                                                                                                                   
+     MANAGEMENT_HEALTH_REDIS_ENABLED=true
+     ```                                                                                                                                                          
+                                          
+  2. Run the backend:
+                                                                                                                                                                  
+     ```bash
+     JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn spring-boot:run                                                                                                
+     ```          
 
-## Conversation store options
+     The `spring-boot-docker-compose` integration auto-starts `compose.yaml`
+     (Redis 7-alpine on `localhost:6379`) and connects the app once the
+     container is healthy. Stopping the app stops the container too.
+                                                                                                                                                                  
+  3. Inspect data while the app runs:     
+                                                                                                                                                                  
+     ```bash                                                                                                                                                      
+     docker exec -it nordic-dev-mentor-redis redis-cli
+     > KEYS ndm:session:*                                                                                                                                         
+     > LRANGE ndm:session:<id> 0 -1           
+     ```                                  
 
-The backend has two `ConversationStore` implementations behind the same port,
-selected at startup via the `DEVMENTOR_STORE_TYPE` env var.
+  The Redis adapter stores one Redis List per session under the key                                                                                               
+  `ndm:session:<sessionId>` and enforces the sliding window via `RPUSH` +
+  `LTRIM`. Window size comes from `devmentor.conversation.max-messages`.                                                                                          
+                                          
+  For production (Railway etc.), point `REDIS_HOST`, `REDIS_PORT`, and
+  `REDIS_PASSWORD` at your hosted Redis. Docker Compose is a local-dev                                                                                            
+  convenience only.
 
-### In-memory (default)
-
-No setup. Conversations live in a `ConcurrentHashMap` in app memory. Lost on
-restart, doesn't scale across instances. Fine for local dev and demos.
-
-### Redis (opt-in)
-
-Persists conversations in Redis. Survives restarts and works across instances.
-
-1. Set env vars in `.env`:
-
-   ```bash
-   DEVMENTOR_STORE_TYPE=redis
-   MANAGEMENT_HEALTH_REDIS_ENABLED=true
-   ```
-
-2. Run the backend:
-
-   ```bash
-   JAVA_HOME=$(/usr/libexec/java_home -v 21) mvn spring-boot:run
-   ```
-
-   The `spring-boot-docker-compose` integration auto-starts `compose.yaml`
-   (Redis 7-alpine on `localhost:6379`) and connects the app once the
-   container is healthy. Stopping the app stops the container too.
-
-3. Inspect data while the app runs:
-
-   ```bash
-   docker exec -it nordic-dev-mentor-redis redis-cli
-   > KEYS ndm:session:*
-   > LRANGE ndm:session:<id> 0 -1
-   ```
-
-The Redis adapter stores one Redis List per session under the key
-`ndm:session:<sessionId>` and enforces the sliding window via `RPUSH` +
-`LTRIM`. Window size comes from `devmentor.conversation.max-messages`.
-
-For production (Railway etc.), point `REDIS_HOST`, `REDIS_PORT`, and
-`REDIS_PASSWORD` at your hosted Redis. Docker Compose is a local-dev
-convenience only.
 
 ## API
 
