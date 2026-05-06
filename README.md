@@ -66,6 +66,15 @@ The frontend mirrors the idea: Server Actions are the only path from UI to
 backend. Browser code never knows the backend URL or sees the API key — all
 of that happens server-side inside the Next.js container.
 
+## Architectural decisions
+
+Significant design choices are recorded as ADRs under [`documentation/adr/`](documentation/adr/):
+
+- [ADR-0001: Retry mechanism for OpenRouter integration](documentation/adr/0001-retry-mechanism.md)
+  — programmatic `RetryTemplate` chosen over `@Retryable`, with a worked-out
+  alternative implementation (two-bean pattern, AOP proxy pitfall, idempotency
+  trade-off) documented for future reference.
+
 ## Local development
 
 ### Backend
