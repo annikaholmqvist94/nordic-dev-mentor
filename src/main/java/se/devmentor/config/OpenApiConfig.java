@@ -16,7 +16,8 @@ public class OpenApiConfig {
                         .title("Nordic Dev Mentor API")
                         .version("v1")
                         .description("Middleware-tjänst som vidarebefordrar chatt-anrop till en LLM " +
-                                "med konfigurerbara personligheter och konversationsminne.")
+                                "med konfigurerbara personligheter, konversationsminne, och " +
+                                "automatisk maskning av PII i input.")
                         .contact(new Contact().name("Annika Holmqvist")));
     }
 }

@@ -29,6 +29,7 @@ without losing context.
 - Spring RestClient (sync) over JDK 11 HttpClient against OpenRouter
 - Spring Retry `RetryTemplate` (429 / 5xx with exponential backoff + Idempotency-Key for dedup)
 - springdoc-openapi at `/swagger-ui.html`
+- Regex-based PII filter (email, Swedish personnummer with Luhn, Swedish phone) — masks input before forwarding to OpenRouter
 - Pluggable conversation store with sliding-window history (in-memory by default, Redis opt-in)
 - Spring Boot Actuator for `/actuator/health`
 
@@ -46,7 +47,7 @@ without losing context.
   the backend, no CORS configuration needed
 
 **Tests**
-- 20 backend tests (JUnit 5 + WireMock + MockMvc + Mockito)
+- 55 backend tests (JUnit 5 + WireMock + MockMvc + Mockito)
 - 26 frontend tests (Vitest + React Testing Library)
 
 ## Architecture
@@ -116,7 +117,7 @@ Open http://localhost:3000.
   ### Tests                                                                                                                                                       
                                                                                                                                                                   
   ```bash                                     
-  mvn test                   # backend (20 tests)
+  mvn test                   # backend (55 tests)
   mvn verify                 # backend + coverage report
   cd frontend && npm test    # frontend (26 tests)                                                                                                                
   ```
@@ -171,6 +172,53 @@ Open http://localhost:3000.
   convenience only.
 
 
+## PII filtering
+
+### Why
+
+The middleware forwards user input to OpenRouter, a third-party LLM provider
+outside the EU. To reduce exfiltration risk we mask common Swedish PII
+patterns from the user message before the request leaves the backend. This
+is a defense-in-depth measure, not a substitute for a formal compliance
+review.
+
+### What gets masked
+
+| Type | Detection | Mask token |
+|---|---|---|
+| Email | Standard pattern with word boundaries | `[EMAIL]` |
+| Personnummer | `YYMMDD-XXXX` or `YYYYMMDD-XXXX` (separator required) + Luhn checksum | `[PERSONNUMMER]` |
+| Phone | Swedish mobile and landline (`+46` / `0[1-9]` anchored) | `[PHONE]` |
+
+The set of types actually detected in a request is returned in
+`maskedFields` on the response, so clients can surface this to the user.
+
+### How to configure
+
+In `application.yml`:
+
+```yaml
+devmentor:
+  pii:
+    enabled: true
+    types:
+      email: true
+      phone: true
+      personnummer: true
+```
+
+`enabled: false` skips the scanner entirely and `maskedFields` is always
+empty. Per-type flags allow selectively disabling detection without
+redeploying code.
+
+### What is NOT detected
+
+- Names, postal addresses, IP addresses (would need NER, out of scope)
+- Personnummer without a separator (would conflict with phone-like patterns)
+- Non-Swedish phone formats
+- PII in the LLM's reply — only input is scanned
+
+
 ## API
 
 `POST /api/v1/chat`
@@ -199,5 +247,7 @@ Full schema at `/swagger-ui.html`.
   one can read that conversation. A real product would bind sessions to JWT.
 - **Single instance only** — sliding-window history is per-process, so
   horizontal scaling would need external session storage.
+- **PII filter is regex-based and Sweden-focused** — see PII filtering
+  section. Don't rely on it as a sole compliance control.
 - **No streaming** — backend returns the full LLM reply in one response. The
   frontend shows a typing indicator during the await.

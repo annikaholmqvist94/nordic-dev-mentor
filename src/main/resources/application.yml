@@ -23,6 +23,13 @@ devmentor:
     # in-memory (default) eller redis. Override via DEVMENTOR_STORE_TYPE.
     type: ${DEVMENTOR_STORE_TYPE:in-memory}
 
+  pii:
+    enabled: true
+    types:
+      email: true
+      phone: true
+      personnummer: true
+
   openrouter:
     # Sätts via miljövariabel
     api-key: ${OPENROUTER_API_KEY:}
