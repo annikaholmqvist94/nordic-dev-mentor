@@ -46,7 +46,7 @@ without losing context.
   the backend, no CORS configuration needed
 
 **Tests**
-- 14 backend tests (JUnit 5 + WireMock + MockMvc)
+- 20 backend tests (JUnit 5 + WireMock + MockMvc + Mockito)
 - 26 frontend tests (Vitest + React Testing Library)
 
 ## Architecture
@@ -107,9 +107,12 @@ Open http://localhost:3000.
 ### Tests
 
 ```bash
-mvn test                   # backend (14 tests)
+mvn test                   # backend (20 tests)
+mvn verify                 # backend + coverage report
 cd frontend && npm test    # frontend (26 tests)
 ```
+
+Coverage report at `target/site/jacoco/index.html`.
 
 ## API
 
