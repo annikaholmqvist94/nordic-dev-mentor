@@ -6,14 +6,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import se.devmentor.domain.ConversationStore;
 import se.devmentor.domain.LlmClient;
+import se.devmentor.domain.MaskingResult;
 import se.devmentor.domain.Message;
 import se.devmentor.domain.Message.Role;
 import se.devmentor.domain.Personality;
+import se.devmentor.domain.PiiScanner;
+import se.devmentor.domain.PiiType;
 import se.devmentor.exception.LlmServiceException;
 import se.devmentor.web.dto.ChatRequest;
 import se.devmentor.web.dto.ChatResponse;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -25,6 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,13 +39,17 @@ class ChatServiceTest {
 
     private ConversationStore store;
     private LlmClient llm;
+    private PiiScanner piiScanner;
     private ChatService service;
 
     @BeforeEach
     void setUp() {
         store = mock(ConversationStore.class);
         llm = mock(LlmClient.class);
-        service = new ChatService(store, llm);
+        piiScanner = mock(PiiScanner.class);
+        when(piiScanner.mask(anyString()))
+                .thenAnswer(inv -> MaskingResult.none(inv.getArgument(0)));
+        service = new ChatService(store, llm, piiScanner);
     }
 
     @Test
@@ -124,5 +133,56 @@ class ChatServiceTest {
         service.deleteSession("abc");
 
         verify(store).clear("abc");
+    }
+
+    @Test
+    void masked_text_is_what_goes_to_llm_not_original() {
+        when(store.getHistory(anyString())).thenReturn(List.of());
+        when(piiScanner.mask("hi 19900101-2344")).thenReturn(
+                new MaskingResult("hi [PERSONNUMMER]", Set.of(PiiType.PERSONNUMMER)));
+        when(llm.complete(any(), anyDouble())).thenReturn("ok");
+
+        service.handleChat(new ChatRequest(
+                Personality.JUNIOR_HELPER, "hi 19900101-2344", null));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Message>> captor = ArgumentCaptor.forClass(List.class);
+        verify(llm).complete(captor.capture(), anyDouble());
+
+        List<Message> sent = captor.getValue();
+        Message lastMessage = sent.get(sent.size() - 1);
+        assertThat(lastMessage.role()).isEqualTo(Role.USER);
+        assertThat(lastMessage.content()).isEqualTo("hi [PERSONNUMMER]");
+    }
+
+    @Test
+    void masked_text_is_what_gets_persisted_to_history() {
+        when(store.getHistory("sess-1")).thenReturn(List.of());
+        when(piiScanner.mask("hi 19900101-2344")).thenReturn(
+                new MaskingResult("hi [PERSONNUMMER]", Set.of(PiiType.PERSONNUMMER)));
+        when(llm.complete(any(), anyDouble())).thenReturn("ok");
+
+        service.handleChat(new ChatRequest(
+                Personality.JUNIOR_HELPER, "hi 19900101-2344", "sess-1"));
+
+        ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+        verify(store, times(2)).append(eq("sess-1"), captor.capture());
+
+        Message persistedUserMessage = captor.getAllValues().get(0);
+        assertThat(persistedUserMessage.role()).isEqualTo(Role.USER);
+        assertThat(persistedUserMessage.content()).isEqualTo("hi [PERSONNUMMER]");
+    }
+
+    @Test
+    void response_includes_masked_field_types() {
+        when(store.getHistory(anyString())).thenReturn(List.of());
+        when(piiScanner.mask("hi 19900101-2344")).thenReturn(
+                new MaskingResult("hi [PERSONNUMMER]", Set.of(PiiType.PERSONNUMMER)));
+        when(llm.complete(any(), anyDouble())).thenReturn("ok");
+
+        ChatResponse response = service.handleChat(new ChatRequest(
+                Personality.JUNIOR_HELPER, "hi 19900101-2344", null));
+
+        assertThat(response.maskedFields()).containsExactly(PiiType.PERSONNUMMER);
     }
 }
