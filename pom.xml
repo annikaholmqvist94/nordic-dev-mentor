@@ -40,6 +40,22 @@
             <version>${spring-retry.version}</version>
         </dependency>
 
+        <!-- Redis client + RedisTemplate + Jackson serializers.
+             Used by RedisConversationStore when devmentor.store.type=redis. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- Auto-starts compose.yaml when running mvn spring-boot:run locally.
+             runtime + optional = doesn't bloat the production JAR. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-docker-compose</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Bean Validation: @NotBlank, @Size etc på DTO:er -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
