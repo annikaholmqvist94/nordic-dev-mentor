@@ -1,6 +1,7 @@
 package se.devmentor.infrastructure.store;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import se.devmentor.config.ConversationProperties;
 import se.devmentor.domain.ConversationStore;
@@ -28,6 +29,10 @@ import java.util.concurrent.ConcurrentMap;
  *   - Ingen TTL sessioner ackumuleras tills processen dör
  */
 @Component
+@ConditionalOnProperty(
+        name = "devmentor.store.type",
+        havingValue = "in-memory",
+        matchIfMissing = true)
 @RequiredArgsConstructor
 public class InMemoryConversationStore implements ConversationStore {
 
