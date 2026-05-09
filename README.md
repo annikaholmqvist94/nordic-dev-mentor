@@ -1,5 +1,7 @@
 # Nordic Dev Mentor
 
+[![CI](https://github.com/annikaholmqvist94/nordic-dev-mentor/actions/workflows/ci.yml/badge.svg)](https://github.com/annikaholmqvist94/nordic-dev-mentor/actions/workflows/ci.yml)
+
 A Spring Boot middleware that proxies chat requests to OpenRouter with four
 distinct mentor personalities, paired with a Next.js frontend in editorial
 Nordic design.
