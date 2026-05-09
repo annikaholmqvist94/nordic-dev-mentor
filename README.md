@@ -54,6 +54,36 @@ without losing context.
 
 ## Architecture
 
+Runtime topology — two Railway services, with the OpenRouter API key isolated
+to the backend and PII masked before any request leaves the JVM:
+
+```mermaid
+flowchart LR
+    Browser[Browser]
+
+    subgraph FE [Next.js container]
+      SA[Server Action]
+    end
+
+    subgraph BE [Spring Boot container]
+      Svc[ChatService]
+      PII[PII Scanner]
+      OR[OpenRouter Client<br/>RestClient + Retry]
+      Store[(Conversation Store<br/>in-memory default)]
+    end
+
+    Redis[(Redis<br/>opt-in)]
+    LLM[OpenRouter API]
+
+    Browser -->|HTTPS| SA
+    SA -->|backend.railway.internal| Svc
+    Svc --> PII
+    Svc --> Store
+    Svc --> OR
+    Store -.-> Redis
+    OR -->|retry on 429/5xx| LLM
+```
+
 Hexagonal layout — domain layer has no Spring imports:
 
 ```
