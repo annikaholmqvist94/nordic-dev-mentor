@@ -1,0 +1,11 @@
+target/
+**/node_modules/
+.git/
+.idea/
+.vscode/
+frontend/
+documentation/
+docs/
+*.md
+compose.yaml
+.dockerignore
